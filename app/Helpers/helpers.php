@@ -1,5 +1,24 @@
 <?php
 
+if (!function_exists('flag')) {
+	
+	function flag($locale) {
+	
+		$code = '';
+
+		switch ($locale) {
+			case "en":
+				$code = "gb";
+				break;
+			default:
+				$code = $locale;
+		}		
+
+		return '<span class="flag-icon flag-icon-'.$code.'"></span>';
+	}	
+
+}
+
 if(!function_exists('money')) {
     /**
      * @param int $amount

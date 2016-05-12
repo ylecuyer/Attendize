@@ -170,6 +170,8 @@ return [
         MaxHoffmann\Parsedown\ParsedownServiceProvider::class,
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
+	Mcamara\LaravelLocalization\LaravelLocalizationServiceProvider::class,
+	Potsky\LaravelLocalizationHelpers\LaravelLocalizationHelpersServiceProvider::class,
 
     ],
 
@@ -233,6 +235,8 @@ return [
         'Purifier'     => Mews\Purifier\Facades\Purifier::class,
         'Markdown'     => MaxHoffmann\Parsedown\ParsedownFacade::class,
         'Omnipay'      => Omnipay\Omnipay::class,
+	'LaravelLocalization'   => Mcamara\LaravelLocalization\Facades\LaravelLocalization::class,
+	'LocalizationHelpers' => Potsky\LaravelLocalizationHelpers\Facade\LocalizationHelpers::class,
        // 'Omnipay'      => Omnipay\Omnipay::class,
 
     ],

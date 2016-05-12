@@ -45,6 +45,19 @@
                         </div>
 
                         <div class="form-group">
+                            {!! Form::label('locale', 'Language', array('class'=>'control-label required')) !!}
+                            {!! Form::select('locale', 
+					array(
+                                   	null => '',
+					'en' => 'English',
+					'es' => 'Espagnol',		
+					'fr' => 'French',		
+					     ),
+					Input::old('locale'), array('class'=>'form-control')) !!}
+
+                        </div>
+
+                        <div class="form-group">
                             {!! Form::label('email', 'Email Address', array('class'=>'control-label')) !!}
 
                             {!!  Form::text('email', Input::old('email'),

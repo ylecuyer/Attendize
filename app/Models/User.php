@@ -44,6 +44,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         'first_name',
         'last_name',
         'phone',
+        'locale',
         'email',
         'password',
         'confirmation_code',
@@ -154,5 +155,9 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
             $user->confirmation_code = str_random();
             $user->api_token = str_random(60);
         });
+    }
+
+    public function getLocale() {
+	return $this->locale;
     }
 }

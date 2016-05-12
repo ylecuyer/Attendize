@@ -21,7 +21,7 @@ Attendees
 
 
 @section('head')
-
+    {!! HTML::style('vendor/flag-icon-css/css/flag-icon.min.css') !!}
 @stop
 
 @section('page_header')
@@ -91,7 +91,10 @@ Attendees
                             <th>
                                {!!Html::sortable_link('Order Ref.', $sort_by, 'order_reference', $sort_order, ['q' => $q , 'page' => $attendees->currentPage()])!!}
                             </th>
-                            <th></th>
+                            <th>
+                               {!!Html::sortable_link('Locale', $sort_by, 'locale', $sort_order, ['q' => $q , 'page' => $attendees->currentPage()])!!}
+                            </th>
+			    <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,6 +113,9 @@ Attendees
                                 <a href="javascript:void(0);" data-modal-id="view-order-{{ $attendee->order->id }}" data-href="{{route('showManageOrder', ['order_id'=>$attendee->order->id])}}" title="View Order #{{$attendee->order->order_reference}}" class="loadModal">
                                     {{$attendee->order->order_reference}}
                                 </a>
+                            </td>
+                            <td>
+				{!! flag($attendee->locale) !!}
                             </td>
                             <td class="text-center">
                                 <div class="btn-group">

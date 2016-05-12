@@ -35,7 +35,7 @@ class EventAttendeesController extends MyBaseController
      */
     public function showAttendees(Request $request, $event_id)
     {
-        $allowed_sorts = ['first_name', 'email', 'ticket_id', 'order_reference'];
+        $allowed_sorts = ['first_name', 'email', 'ticket_id', 'order_reference', 'locale'];
 
         $searchQuery = $request->get('q');
         $sort_order = $request->get('sort_order') == 'asc' ? 'asc' : 'desc';
@@ -114,6 +114,7 @@ class EventAttendeesController extends MyBaseController
             'first_name'   => 'required',
             'ticket_id'    => 'required|exists:tickets,id,account_id,' . \Auth::user()->account_id,
             'email'        => 'email|required',
+            'locale'        => 'required',
         ];
 
         $messages = [
@@ -135,6 +136,7 @@ class EventAttendeesController extends MyBaseController
         $attendee_first_name = $request->get('first_name');
         $attendee_last_name = $request->get('last_name');
         $attendee_email = $request->get('email');
+        $attendee_locale = $request->get('locale');
         $email_attendee = $request->get('email_ticket');
 
         DB::beginTransaction();
@@ -186,6 +188,7 @@ class EventAttendeesController extends MyBaseController
             $attendee->first_name = $attendee_first_name;
             $attendee->last_name = $attendee_last_name;
             $attendee->email = $attendee_email;
+        $attendee->locale = $attendee_locale;
             $attendee->event_id = $event_id;
             $attendee->order_id = $order->id;
             $attendee->ticket_id = $ticket_id;
@@ -632,6 +635,7 @@ class EventAttendeesController extends MyBaseController
             'first_name' => 'required',
             'ticket_id'  => 'required|exists:tickets,id,account_id,' . Auth::user()->account_id,
             'email'      => 'required|email',
+            'locale'      => 'required',
         ];
 
         $messages = [

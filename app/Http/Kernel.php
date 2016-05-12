@@ -18,6 +18,7 @@ class Kernel extends HttpKernel
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \App\Http\Middleware\VerifyCsrfToken::class,
         \App\Http\Middleware\GeneralChecks::class,
+        \App\Http\Middleware\LocaleMiddleware::class,
     ];
     /**
      * The application's route middleware groups.

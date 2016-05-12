@@ -49,6 +49,23 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            {!! Form::label('locale', 'Language', array('class'=>'control-label required')) !!}
+                            {!!  Form::select('locale', 
+					array(
+					 'en' => 'English',
+					 'es' => 'Español',
+					),
+					Input::old('locale'),
+                                        array(
+                                        'class'=>'form-control '
+                                        ))  !!}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row more-options">
                     <div class="col-md-12">
 

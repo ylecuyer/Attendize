@@ -38,6 +38,7 @@ class UserController extends Controller
             'password'     => 'passcheck',
             'first_name'   => ['required'],
             'last_name'    => ['required'],
+            'locale'    => ['required'],
         ];
 
         $messages = [
@@ -46,6 +47,7 @@ class UserController extends Controller
             'password.passcheck'  => 'This password is incorrect.',
             'email.exists'        => 'This E-mail has is already in use.',
             'first_name.required' => 'Please enter your first name.',
+            'locale.required' => 'Please select your locale',
         ];
 
         $validation = Validator::make($request->all(), $rules, $messages);
@@ -65,6 +67,7 @@ class UserController extends Controller
 
         $user->first_name = $request->get('first_name');
         $user->last_name  = $request->get('last_name');
+        $user->locale = $request->get('locale');
 
         $user->save();
 
