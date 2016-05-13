@@ -43,12 +43,7 @@
                         <div class="form-group">
                             {!! Form::label('locale', 'Language', array('class'=>'control-label required')) !!}
                             {!! Form::select('locale', 
-					array(
-                                   	null => '',
-					'en' => 'English',
-					'es' => 'Espagnol',		
-					'fr' => 'French',		
-					     ),
+					array_merge(array(null => ''), get_supported_locales()),
 					Input::old('locale'), array('class'=>'form-control')) !!}
 
                         </div>

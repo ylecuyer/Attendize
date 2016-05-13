@@ -1,5 +1,19 @@
 <?php
 
+if (!function_exists('get_supported_locales')) {
+	
+	function get_supported_locales() {
+		
+		return array(
+			"en" => "English",
+			"es" => "Spanish",
+			"fr" => "French",
+		);
+
+	}
+
+}
+
 if (!function_exists('flag')) {
 	
 	function flag($locale) {
