@@ -19,6 +19,7 @@ return array(
 	'folders'             => array(
 		'%BASE/resources/views' ,
 		'%APP/Http/Controllers' ,
+		'%APP/Mailers' ,
 	) ,
 
 
