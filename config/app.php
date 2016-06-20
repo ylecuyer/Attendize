@@ -170,6 +170,7 @@ return [
         MaxHoffmann\Parsedown\ParsedownServiceProvider::class,
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Laracasts\Utilities\JavaScript\JavaScriptServiceProvider::class,
+        Codesleeve\LaravelStapler\Providers\L5ServiceProvider::class,
 
     ],
 

@@ -289,4 +289,14 @@ class Event extends MyBaseModel
     {
         return ['created_at', 'updated_at', 'start_date', 'end_date'];
     }
+
+    public function model()
+    {
+      return $this->hasOne('App\Models\Model', 'id', 'invitation_model_id');
+    }
+
+    public function models()
+    {
+      return $this->hasMany('App\Models\Model');
+    }
 }

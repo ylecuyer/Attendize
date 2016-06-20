@@ -52,12 +52,16 @@ class MyBaseController extends Controller
         $image_path = $event->organiser->full_logo_path;
         if ($event->images->first() != null) {
           $image_path = $event->images()->first()->image_path;
+        $models = array(null => 'Default');
+        foreach ($event->models as $model) {
+          $models[$model->id] = $model->name;
         }
 
         return array_merge([
             'event' => $event,
             'questions' => $event->questions()->get(),
             'image_path' => $image_path,
+            'models' => $models,
         ], $additional_data);
     }
 

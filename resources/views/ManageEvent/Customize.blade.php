@@ -200,6 +200,8 @@
                 <li data-route="{{route('showEventCustomizeTab', ['event_id' => $event->id, 'tab' => 'ticket_design'])}}"
                     class="{{$tab == 'ticket_design' ? 'active' : ''}}"><a href="#ticket_design" data-toggle="tab">Ticket
                         Design</a></li>
+                <li data-route="{{route('showEventCustomizeTab', ['event_id' => $event->id, 'tab' => 'invitations'])}}"
+                    class="{{$tab == 'invitations' ? 'active' : ''}}"><a href="#invitations" data-toggle="tab">Invitations</a></li>
 
             </ul>
             <!--/ tab -->
@@ -565,6 +567,67 @@
 
                     {!! Form::close() !!}
 
+                </div>
+
+                <div class="tab-pane {{$tab == 'invitations' ? 'active' : ''}}" id="invitations">
+                        <div class="col-md-12">
+                            <div class="well">
+                              <h4>Models</h4>
+                              <ul>
+                                @foreach ($event->models()->get() as $model)
+                                <li>{{ $model->name }} <a href="#" class="btn btn-danger btn-xs">Delete</a></li>
+                                @endforeach
+                              </ul>
+                              <div class="row">
+                    {!! Form::model($event, array('url' => route('postAddEventModel', ['event_id' => $event->id]), 'class' => 'ajax ')) !!}
+                                <div class="col-md-6">
+                                {!! Form::label('name', 'Model name', ['class'=>'control-label required']) !!}
+                                {!!  Form::input('text', 'model_name', Input::old('model_name'),
+                                                            [
+                                                            'class'=>'form-control required',
+                                                            ])  !!}
+                                </div>
+                                <div class="col-md-6">
+                                {!! Form::label('name', 'Model HTML', ['class'=>'control-label required']) !!}
+                                {!! Form::styledFile('model_html', 1) !!}
+                                </div>
+                              </div>
+                              <br/>
+                              <div class="row">
+                                <div class="col-md-1">
+                                  {!! Form::submit('Add model', ['class'=>"btn btn-success"]) !!}
+                                </div>
+                              </div>
+                    {!! Form::close() !!}
+                              
+                            </div>
+                        </div>
+                    {!! Form::model($event, array('url' => route('postEditEventInvitations', ['event_id' => $event->id]), 'class' => 'ajax ')) !!}
+                    <h4>Invitations</h4>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {!! Form::label('invitation_mail_subject', 'Mail subject', ['class'=>'control-label ']) !!}
+                                {!!  Form::input('text', 'invitation_mail_subject', Input::old('invitation_mail_subject'),
+                                                            [
+                                                            'class'=>'form-control',
+                                                            'placeholder'=> 'Your ticket for the event'
+                                                            ])  !!}
+                                {!! Form::label('invitation_model_id', 'Model', ['class'=>'control-label ']) !!}
+                                {!!  Form::select('invitation_model_id', $models , Input::old('invitation_model_id'),
+                                                            [
+                                                            'class'=>'form-control',
+                                                            ])  !!}
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <div class="panel-footer mt15 text-right">
+                              {!! Form::submit('Save Changes', ['class'=>"btn btn-success"]) !!}
+                          </div>
+                        </div>
+                    {!! Form::close() !!}
+                    </div>
                 </div>
 
             </div>

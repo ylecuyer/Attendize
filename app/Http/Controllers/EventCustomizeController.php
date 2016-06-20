@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Model;
 use File;
 use Image;
 use Validator;
@@ -301,5 +302,37 @@ class EventCustomizeController extends MyBaseController
             'message' => 'Event Page Successfully Updated',
             'runThis' => 'document.getElementById(\'previewIframe\').contentWindow.location.reload(true);',
         ]);
+    }
+
+    function postAddEventModel(Request $request, $event_id) {
+
+      $model = new Model();
+      $model->name = $request->get('model_name');
+      $model->html = $request->file('model_html');
+      $model->event_id = $event_id;
+      $model->save();
+
+      return response()->json([
+        'status'      => 'success',
+        'redirectUrl' => route('showEventCustomize', [
+          'event_id' => $event_id,
+        ]),
+      ]);
+    }
+
+    function postEditEventInvitations(Request $request, $event_id) {
+
+      $event = Event::find($event_id);
+      $event->invitation_mail_subject = $request->get('invitation_mail_subject');
+      $event->invitation_model_id = $request->get('invitation_model_id');
+      $event->save();
+
+      return response()->json([
+        'status'      => 'success',
+        'redirectUrl' => route('showEventCustomize', [
+          'event_id' => $event_id,
+        ]),
+      ]);
+
     }
 }

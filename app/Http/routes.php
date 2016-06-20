@@ -555,6 +555,15 @@ Route::group(['middleware' => ['auth', 'first.run']], function () {
             'uses' => 'EventCustomizeController@postEditEventFees',
         ]);
 
+        Route::post('{event_id}/customize/invitations', [
+            'as'   => 'postEditEventInvitations',
+            'uses' => 'EventCustomizeController@postEditEventInvitations',
+        ]);
+
+        Route::post('{event_id}/customize/models', [
+            'as'   => 'postAddEventModel',
+            'uses' => 'EventCustomizeController@postAddEventModel',
+        ]);
 
         /*
          * -------
