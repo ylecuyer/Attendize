@@ -2,17 +2,19 @@ web:
   build: .
   dockerfile: Dockerfile-nginx
   ports:
-    - "8080:80"
+    - "80:80"
+    - "443:443"
   links:
     - php
   volumes:
     - .:/usr/share/nginx/html/attendize
+    - /etc/letsencrypt/live/amba.ylecuyer.xyz/fullchain.pem:/fullchain.pem
+    - /etc/letsencrypt/live/amba.ylecuyer.xyz/privkey.pem:/privkey.pem
 php:
   build: .
   dockerfile: Dockerfile-php
   links:
     - db
-    - maildev
     - redis
   volumes:
     - .:/usr/share/nginx/html/attendize
@@ -21,7 +23,6 @@ php-worker:
   dockerfile: Dockerfile-php
   links:
     - db
-    - maildev
     - redis
   volumes:
     - .:/usr/share/nginx/html/attendize
@@ -32,13 +33,9 @@ db:
     - POSTGRES_USER=attendize
     - POSTGRES_PASSWORD=attendize
     - POSTGRES_DB=attendize
-  ports:
-    - "5433:5432"
   volumes:
-    - ./docker/pgdata:/var/lib/postgresql/data
-maildev:
-  image: djfarrelly/maildev
+    - /var/lib/postgresql/data
   ports:
-    - "1080:80"
+    - "5432:5432"
 redis:
   image: redis
