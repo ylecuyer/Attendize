@@ -108,23 +108,59 @@ var checkinApp = new Vue({
             }
 
             qrcode.callback = this.QrCheckin;
+
+	    stream = function (stream) {
+
+		    that.stream = stream;
+
+		    if (window.webkitURL) {
+			    that.videoElement.src = window.webkitURL.createObjectURL(stream);
+		    } else {
+			    that.videoElement.mozSrcObject = stream;
+		    }
+
+		    that.videoElement.play();
+
+
+	    };
+
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-            navigator.getUserMedia({video: true, audio: false}, function (stream) {
+		var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+		
+	    if (!isFirefox && (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices)) {
+		    navigator.mediaDevices.enumerateDevices()
+			    .then(function(devices) {
+								str = "";
+								i = 0;
+								cameras = [];
+					    devices.forEach(function(device) {
+								
+								
+								if (device.kind != 'videoinput') return;
 
-                that.stream = stream;
+								cameras.push(device);
+								i++;
+								
+								str += i + ". " + device.label;
+								str += "\n";
+							    });
+						var j = prompt(str);
 
-                if (window.webkitURL) {
-                    that.videoElement.src = window.webkitURL.createObjectURL(stream);
-                } else {
-                    that.videoElement.mozSrcObject = stream;
-                }
+						
+						navigator.getUserMedia({video: { optional: [{sourceId: cameras[j - 1].deviceId}]}, audio: false}, stream, function() {});
 
-                that.videoElement.play();
+					    })
+		    .catch(function(err) {
+				    navigator.getUserMedia({video: true, audio: false}, stream, function() {});
+				    });
+	    }
+	    else {
+				    navigator.getUserMedia({video: true, audio: false}, stream, function() {});
+		}
 
-            }, function () { /* error*/
-            });
 
+			
             this.isInit = true;
             this.QrTimeout = setTimeout(function () {
                 that.captureQrToCanvas();
