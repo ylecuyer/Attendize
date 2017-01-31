@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
-use Input;
 use Redirect;
 use View;
 
@@ -66,6 +64,6 @@ class UserLoginController extends Controller
                 ->withInput();
         }
 
-        return Redirect::to(route('showSelectOrganiser'));
+        return redirect()->intended(route('showSelectOrganiser'));
     }
 }

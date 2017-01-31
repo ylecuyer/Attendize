@@ -12,19 +12,17 @@ use Validator;
 class MyBaseModel extends \Illuminate\Database\Eloquent\Model
 {
     /**
-     * Indicates whether the model uses soft deletes.
-     *
-     * @var bool $softDelete
-     */
-    protected $softDelete = true;
-
-    /**
      * Indicates if the model should be timestamped.
      *
      * @var bool $timestamps
      */
     public $timestamps = true;
-
+    /**
+     * Indicates whether the model uses soft deletes.
+     *
+     * @var bool $softDelete
+     */
+    protected $softDelete = true;
     /**
      * The validation rules of the model.
      *
@@ -45,6 +43,39 @@ class MyBaseModel extends \Illuminate\Database\Eloquent\Model
      * @var  $errors
      */
     protected $errors;
+
+    /**
+     * Create a new model.
+     *
+     * @param int $account_id
+     * @param int $user_id
+     * @param bool $ignore_user_id
+     *
+     * @return \className
+     */
+    public static function createNew($account_id = false, $user_id = false, $ignore_user_id = false)
+    {
+        $className = get_called_class();
+        $entity = new $className();
+
+        if (Auth::check()) {
+            if (!$ignore_user_id) {
+                $entity->user_id = Auth::user()->id;
+            }
+
+            $entity->account_id = Auth::user()->account_id;
+        } elseif ($account_id || $user_id) {
+            if ($user_id && !$ignore_user_id) {
+                $entity->user_id = $user_id;
+            }
+
+            $entity->account_id = $account_id;
+        } else {
+            App::abort(500);
+        }
+
+        return $entity;
+    }
 
     /**
      * Validate the model instance.
@@ -80,39 +111,6 @@ class MyBaseModel extends \Illuminate\Database\Eloquent\Model
     }
 
     /**
-     * Create a new model.
-     *
-     * @param int  $account_id
-     * @param int  $user_id
-     * @param bool $ignore_user_id
-     *
-     * @return \className
-     */
-    public static function createNew($account_id = false, $user_id = false, $ignore_user_id = false)
-    {
-        $className = get_called_class();
-        $entity = new $className();
-
-        if (Auth::check()) {
-            if (!$ignore_user_id) {
-                $entity->user_id = Auth::user()->id;
-            }
-
-            $entity->account_id = Auth::user()->account_id;
-        } elseif ($account_id || $user_id) {
-            if ($user_id && !$ignore_user_id) {
-                $entity->user_id = $user_id;
-            }
-
-            $entity->account_id = $account_id;
-        } else {
-            App::abort(500);
-        }
-
-        return $entity;
-    }
-
-    /**
      * Get a formatted date.
      *
      * @param        $field
@@ -130,7 +128,6 @@ class MyBaseModel extends \Illuminate\Database\Eloquent\Model
      *
      * @param $query
      * @param bool $accountId
-     * @param Request $request
      * @return mixed
      */
     public function scopeScope($query, $accountId = false)
@@ -150,7 +147,7 @@ class MyBaseModel extends \Illuminate\Database\Eloquent\Model
         $table = $this->getTable();
 
         $query->where(function ($query) use ($accountId, $table) {
-            $query->whereRaw(\DB::raw('('.$table.'.account_id = '.$accountId.')'));
+            $query->whereRaw(\DB::raw('(' . $table . '.account_id = ' . $accountId . ')'));
         });
 
         return $query;

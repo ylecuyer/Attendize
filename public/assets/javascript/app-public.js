@@ -28,10 +28,11 @@ $(function() {
                         }
 
                         toggleSubmitDisabled($submitButton);
-                        showMessage('Whoops!, it looks like something went wrong on our servers.\n\
-                   Please try again, or contact support if the problem persists.');
+                        showMessage('Whoops!, it looks like the server returned an error.\n\
+                   Please try again, or contact the webmaster if the problem persists.');
                     },
                     success: function(data, statusText, xhr, $form) {
+                        var $submitButton = $form.find('input[type=submit]');
 
                         if (data.message) {
                             showMessage(data.message);
@@ -46,46 +47,33 @@ $(function() {
                                         document.location.href = data.redirectUrl;
                                     }
                                 }
-
-                                var $submitButton = $form.find('input[type=submit]');
-                                toggleSubmitDisabled($submitButton);
                                 break;
 
                             case 'error':
                                 if (data.messages) {
-                                    $.each(data.messages, function(index, error) {
-
-                                        /*
-                                         * use the class as the selector if the input name is an array.
-                                         */
-                                        var selector = (index.indexOf(".") >= 0) ? '.' + index.replace(/\./g, "\\.") : ':input[name=' + index + ']';
-
-                                        $(selector, $form)
-                                                .after('<div class="help-block error">' + error + '</div>')
-                                                .parent()
-                                                .addClass('has-error');
-                                    });
+                                    processFormErrors($form, data.messages);
+                                    return;
                                 }
-
-
-                                var $submitButton = $form.find('input[type=submit]');
-                                toggleSubmitDisabled($submitButton);
-
                                 break;
 
                             default:
                                 break;
+
+
                         }
+
+                        toggleSubmitDisabled($submitButton);
+
+
                     },
                     dataType: 'json'
                 };
 
         toggleSubmitDisabled($submitButton);
 
-        if ($form.hasClass('payment-form')) {
-            
+        if ($form.hasClass('payment-form') && !$('#pay_offline').is(":checked")) {
             clearFormErrors($('.payment-form'));
-            
+
             Stripe.setPublishableKey($form.data('stripe-pub-key'));
 
             var
@@ -95,6 +83,7 @@ $(function() {
                     $cvcNumber = $('.card-cvc'),
                     $expiryMonth = $('.card-expiry-month'),
                     $expiryYear = $('.card-expiry-year');
+
 
             if (!Stripe.validateCardNumber($cardNumber.val())) {
                 showFormError($cardNumber, 'The credit card number appears to be invalid.');
@@ -131,7 +120,7 @@ $(function() {
                         $form.append($('<input type="hidden" name="stripeToken" />').val(token));
                         $form.ajaxSubmit(ajaxFormConf);
                     }
-                    
+
                 });
             } else {
                 showMessage('Please check your card details and try again.');
@@ -146,6 +135,7 @@ $(function() {
     $('a').smoothScroll({
         offset: -60
     });
+
 
     /* Scroll to top */
     $(window).scroll(function() {
@@ -172,13 +162,27 @@ $(function() {
         $('.ticket_holder_email').val($('#order_email').val());
     });
 
+    $('.card-number').payment('formatCardNumber');
+    $('.card-cvc').payment('formatCardCVC');
+
+    $('#pay_offline').change(function () {
+        $('.online_payment').toggle(!this.checked);
+        $('.offline_payment').toggle(this.checked);
+
+        // Disable CC form inputs to prevent Chrome trying to validate hidden fields
+        $('.online_payment input,  .online_payment select').attr('disabled', this.checked);
+
+    }).change();
+
+
 });
 
 function processFormErrors($form, errors)
 {
     $.each(errors, function (index, error)
     {
-        var $input = $(':input[name=' + index + ']', $form);
+        var selector = (index.indexOf(".") >= 0) ? '.' + index.replace(/\./g, "\\.") : ':input[name=' + index + ']';
+        var $input = $(selector, $form);
 
         if ($input.prop('type') === 'file') {
             $('#input-' + $input.prop('name')).append('<div class="help-block error">' + error + '</div>')
@@ -200,8 +204,8 @@ function processFormErrors($form, errors)
 }
 
 /**
- * Toggle a submit button disabled/enabled - duh!
- * 
+ * Toggle a submit button disabled/enabled
+ *
  * @param element $submitButton
  * @returns void
  */
@@ -222,7 +226,7 @@ function toggleSubmitDisabled($submitButton) {
 
 /**
  * Clears given form of any error classes / messages
- * 
+ *
  * @param {Element} $form
  * @returns {void}
  */
@@ -247,7 +251,7 @@ function showFormError($formElement, message) {
 /**
  * Shows users a message.
  * Currently uses humane.js
- * 
+ *
  * @param string message
  * @returns void
  */
@@ -264,7 +268,7 @@ function hideMessage() {
 
 /**
  * Counts down to the given number of seconds
- * 
+ *
  * @param element $element
  * @param int seconds
  * @returns void

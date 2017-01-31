@@ -33,13 +33,17 @@
         font-size: 20px;
     }
 
-    .order_details.well {
+    .order_details.well, .offline_payment_instructions {
         margin-top: 25px;
         background-color: #FCFCFC;
         line-height: 30px;
         text-shadow: 0 1px 0 rgba(255,255,255,.9);
         color: #656565;
         overflow: hidden;
+    }
+
+    .ticket_download_link {
+        border-bottom: 3px solid;
     }
 </style>
 
@@ -51,7 +55,7 @@
             </span>
             <h1>Thank you for your order!</h1>
             <h2>
-                Your <a href="{{route('showOrderTickets', ['order_reference' => $order->order_reference])}}?download=1">tickets</a> and a confirmation email have been sent to you.
+                Your <a title="Download Tickets" class="ticket_download_link" href="{{route('showOrderTickets', ['order_reference' => $order->order_reference])}}?download=1">tickets</a> and a confirmation email have been sent to you.
             </h2>
         </div>
     </div>
@@ -94,6 +98,20 @@
                     </div>
                 </div>
 
+
+                    @if(!$order->is_payment_received)
+                        <h3>
+                            Payment Instructions
+                        </h3>
+                    <div class="alert alert-info">
+                        This order is awaiting payment. Please read the below instructions on how to make payment.
+                    </div>
+                    <div class="offline_payment_instructions well">
+                        {!! Markdown::parse($event->offline_payment_instructions) !!}
+                    </div>
+
+                    @endif
+
                 <h3>
                     Order Items
                 </h3>
@@ -132,7 +150,7 @@
                                         @if((int)ceil($order_item->unit_price) == 0)
                                         FREE
                                         @else
-                                       {{money($order_item->unit_price, $order->event->currency->code)}}
+                                       {{money($order_item->unit_price, $order->event->currency)}}
                                         @endif
 
                                     </td>
@@ -140,7 +158,7 @@
                                         @if((int)ceil($order_item->unit_price) == 0)
                                         -
                                         @else
-                                        {{money($order_item->unit_booking_fee, $order->event->currency->code)}}
+                                        {{money($order_item->unit_booking_fee, $order->event->currency)}}
                                         @endif
 
                                     </td>
@@ -148,7 +166,7 @@
                                         @if((int)ceil($order_item->unit_price) == 0)
                                         FREE
                                         @else
-                                        {{money(($order_item->unit_price + $order_item->unit_booking_fee) * ($order_item->quantity), $order->event->currency->code)}}
+                                        {{money(($order_item->unit_price + $order_item->unit_booking_fee) * ($order_item->quantity), $order->event->currency)}}
                                         @endif
 
                                     </td>
@@ -165,7 +183,7 @@
                                     <b>Sub Total</b>
                                 </td>
                                 <td colspan="2">
-                                    {{money($order->total_amount, $order->event->currency->code)}}
+                                    {{money($order->total_amount, $order->event->currency)}}
                                 </td>
                             </tr>
                             @if($order->is_refunded || $order->is_partially_refunded)
@@ -180,7 +198,7 @@
                                         <b>Refunded Amount</b>
                                     </td>
                                     <td colspan="2">
-                                        {{money($order->amount_refunded, $order->event->currency->code)}}
+                                        {{money($order->amount_refunded, $order->event->currency)}}
                                     </td>
                                 </tr>
                                 <tr>
@@ -194,7 +212,7 @@
                                         <b>Total</b>
                                     </td>
                                     <td colspan="2">
-                                        {{money($order->total_amount - $order->amount_refunded, $order->event->currency->code)}}
+                                        {{money($order->total_amount - $order->amount_refunded, $order->event->currency)}}
                                     </td>
                                 </tr>
                             @endif
@@ -230,6 +248,8 @@
                         </tbody>
                     </table>
                 </div>
+
+
             </div>
         </div>
     </div>

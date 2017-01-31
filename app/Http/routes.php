@@ -14,6 +14,7 @@ Route::get('install', [
     'as'   => 'showInstaller',
     'uses' => 'InstallerController@showInstaller',
 ]);
+
 Route::post('install', [
     'as'   => 'postInstaller',
     'uses' => 'InstallerController@postInstaller',
@@ -113,6 +114,11 @@ Route::group(['prefix' => 'e'], function () {
     Route::get('/{event_id}/embed', [
         'as'   => 'showEmbeddedEventPage',
         'uses' => 'EventViewEmbeddedController@showEmbeddedEvent',
+    ]);
+
+    Route::get('/{event_id}/calendar.ics', [
+        'as'   => 'downloadCalendarIcs',
+        'uses' => 'EventViewController@showCalendarIcs',
     ]);
 
     Route::get('/{event_id}/{event_slug?}', [
@@ -358,6 +364,10 @@ Route::group(['middleware' => ['auth', 'first.run']], function () {
             'as'   => 'postPauseTicket',
             'uses' => 'EventTicketsController@postPauseTicket',
         ]);
+        Route::post('{event_id}/tickets/order', [
+            'as'   => 'postUpdateTicketsOrder',
+            'uses' => 'EventTicketsController@postUpdateTicketsOrder',
+        ]);
 
         /*
          * Ticket questions
@@ -484,6 +494,21 @@ Route::group(['middleware' => ['auth', 'first.run']], function () {
             'uses' => 'EventOrdersController@manageOrder',
         ]);
 
+        Route::post('order/{order_id}/resend', [
+            'as' => 'resendOrder',
+            'uses' => 'EventOrdersController@resendOrder',
+        ]);
+
+        Route::get('order/{order_id}/show/edit', [
+            'as' => 'showEditOrder',
+            'uses' => 'EventOrdersController@showEditOrder',
+        ]);
+
+        Route::post('order/{order_id}/edit', [
+           'as' => 'postOrderEdit',
+            'uses' => 'EventOrdersController@postEditOrder',
+        ]);
+
         Route::get('order/{order_id}/cancel', [
             'as'   => 'showCancelOrder',
             'uses' => 'EventOrdersController@showCancelOrder',
@@ -492,6 +517,11 @@ Route::group(['middleware' => ['auth', 'first.run']], function () {
         Route::post('order/{order_id}/cancel', [
             'as'   => 'postCancelOrder',
             'uses' => 'EventOrdersController@postCancelOrder',
+        ]);
+
+        Route::post('order/{order_id}/mark_payment_received', [
+            'as'   => 'postMarkPaymentReceived',
+            'uses' => 'EventOrdersController@postMarkPaymentReceived',
         ]);
 
         Route::get('{event_id}/orders/export/{export_as?}', [

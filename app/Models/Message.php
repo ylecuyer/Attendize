@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-/*
-  Attendize.com   - Event Management & Ticketing
- */
+    /*
+      Attendize.com   - Event Management & Ticketing
+     */
 
 /**
  * Description of Message.
@@ -31,7 +31,7 @@ class Message extends MyBaseModel
      */
     public function event()
     {
-        return $this->belongsTo('\App\Models\Event');
+        return $this->belongsTo(\App\Models\Event::class);
     }
 
     /**
@@ -47,13 +47,13 @@ class Message extends MyBaseModel
 
         $ticket = Ticket::scope()->find($this->recipients);
 
-        return 'Ticket: '.$ticket->title;
+        return 'Ticket: ' . $ticket->title;
     }
 
     /**
      * The attributes that should be mutated to dates.
      *
-     * @var array $dates
+     * @return array $dates
      */
     public function getDates()
     {

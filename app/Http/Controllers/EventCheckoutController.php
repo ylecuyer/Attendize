@@ -9,8 +9,8 @@ use App\Models\Event;
 use App\Models\EventStats;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\ReservedTickets;
 use App\Models\QuestionAnswer;
+use App\Models\ReservedTickets;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Cookie;
@@ -58,6 +58,13 @@ class EventCheckoutController extends Controller
         $order_expires_time = Carbon::now()->addMinutes(config('attendize.checkout_timeout_after'));
 
         $event = Event::findOrFail($event_id);
+
+        if (!$request->has('tickets')) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'No tickets selected',
+            ]);
+        }
 
         $ticket_ids = $request->get('tickets');
 
@@ -178,7 +185,7 @@ class EventCheckoutController extends Controller
         }
 
         /*
-         * The 'ticket_order' session stores everything we need to complete the transaction.
+         * The 'ticket_order_{event_id}' session stores everything we need to complete the transaction.
          */
         session()->set('ticket_order_' . $event->id, [
             'validation_rules'        => $validation_rules,
@@ -214,6 +221,9 @@ class EventCheckoutController extends Controller
             ]);
         }
 
+        /*
+         * Maybe display something prettier than this?
+         */
         exit('Please enable Javascript in your browser.');
     }
 
@@ -229,7 +239,8 @@ class EventCheckoutController extends Controller
         $order_session = session()->get('ticket_order_' . $event_id);
 
         if (!$order_session || $order_session['expires'] < Carbon::now()) {
-            return redirect()->route('showEventPage', ['event_id' => $event_id]);
+            $route_name = $this->is_embedded ? 'showEmbeddedEventPage' : 'showEventPage';
+            return redirect()->route($route_name, ['event_id' => $event_id]);
         }
 
         $secondsToExpire = Carbon::now()->diffInSeconds($order_session['expires']);
@@ -296,6 +307,15 @@ class EventCheckoutController extends Controller
          * Begin payment attempt before creating the attendees etc.
          * */
         if ($ticket_order['order_requires_payment']) {
+
+            /*
+             * Check if the user has chosen to pay offline
+             * and if they are allowed
+             */
+            if ($request->get('pay_offline') && $event->enable_offline_payments) {
+                return $this->completeOrder($event_id);
+            }
+
             try {
 
                 $gateway = Omnipay::create($ticket_order['payment_gateway']->name);
@@ -304,11 +324,18 @@ class EventCheckoutController extends Controller
                         'testMode' => config('attendize.enable_test_payments'),
                     ]);
 
+                $transaction_data = [
+                        'amount'      => ($ticket_order['order_total'] + $ticket_order['organiser_booking_fee']),
+                        'currency'    => $event->currency->code,
+                        'description' => 'Order for customer: ' . $request->get('order_email'),
+                    ];
+
+
                 switch ($ticket_order['payment_gateway']->id) {
                     case config('attendize.payment_gateway_paypal'):
                     case config('attendize.payment_gateway_coinbase'):
 
-                        $transaction_data = [
+                        $transaction_data += [
                             'cancelUrl' => route('showEventCheckoutPaymentReturn', [
                                 'event_id'             => $event_id,
                                 'is_payment_cancelled' => 1
@@ -322,12 +349,26 @@ class EventCheckoutController extends Controller
                                 : $event->organiser->name
                         ];
                         break;
-                        break;
                     case config('attendize.payment_gateway_stripe'):
                         $token = $request->get('stripeToken');
-                        $transaction_data = [
-                            'token' => $token,
+                        $transaction_data += [
+                            'token'         => $token,
+                            'receipt_email' => $request->get('order_email'),
                         ];
+                        break;
+                    case config('attendize.payment_gateway_migs'):
+                        $transaction_data += [
+                            'transactionId' => $event_id . date('YmdHis'),       // TODO: Where to generate transaction id?
+                            'returnUrl' => route('showEventCheckoutPaymentReturn', [
+                                'event_id'              => $event_id,
+                                'is_payment_successful' => 1
+                            ]),
+
+                        ];
+
+                        // Order description in MIGS is only 34 characters long; so we need a short description
+                        $transaction_data['description'] = "Ticket sales " . $transaction_data['transactionId'];
+
                         break;
                     default:
                         Log::error('No payment gateway configured.');
@@ -338,11 +379,6 @@ class EventCheckoutController extends Controller
                         break;
                 }
 
-                $transaction_data = [
-                        'amount'      => ($ticket_order['order_total'] + $ticket_order['organiser_booking_fee']),
-                        'currency'    => $event->currency->code,
-                        'description' => 'Order for customer: ' . $request->get('order_email'),
-                    ] + $transaction_data;
 
                 $transaction = $gateway->purchase($transaction_data);
 
@@ -358,16 +394,24 @@ class EventCheckoutController extends Controller
                 } elseif ($response->isRedirect()) {
 
                     /*
-                     * As we're going off-site for payment we need to store some into in a session
+                     * As we're going off-site for payment we need to store some data in a session so it's available
+                     * when we return
                      */
                     session()->push('ticket_order_' . $event_id . '.transaction_data', $transaction_data);
+					Log::info("Redirect url: " . $response->getRedirectUrl());
 
-                    return response()->json([
+                    $return = [
                         'status'       => 'success',
                         'redirectUrl'  => $response->getRedirectUrl(),
-                        'redirectData' => $response->getRedirectData(),
                         'message'      => 'Redirecting to ' . $ticket_order['payment_gateway']->provider_name
-                    ]);
+                    ];
+
+                    // GET method requests should not have redirectData on the JSON return string
+                    if($response->getRedirectMethod() == 'POST') {
+                        $return['redirectData'] = $response->getRedirectData();
+                    }
+
+                    return response()->json($return);
 
                 } else {
                     // display error to customer
@@ -469,19 +513,20 @@ class EventCheckoutController extends Controller
             if (isset($ticket_order['transaction_id'])) {
                 $order->transaction_id = $ticket_order['transaction_id'][0];
             }
-            if ($ticket_order['order_requires_payment']) {
+            if ($ticket_order['order_requires_payment'] && !isset($request_data['pay_offline'])) {
                 $order->payment_gateway_id = $ticket_order['payment_gateway']->id;
             }
             $order->first_name = $request_data['order_first_name'];
             $order->last_name = $request_data['order_last_name'];
             $order->email = $request_data['order_email'];
-            $order->order_status_id = config('attendize.order_complete');
+            $order->order_status_id = isset($request_data['pay_offline']) ? config('attendize.order_awaiting_payment') : config('attendize.order_complete');
             $order->amount = $ticket_order['order_total'];
             $order->booking_fee = $ticket_order['booking_fee'];
             $order->organiser_booking_fee = $ticket_order['organiser_booking_fee'];
             $order->discount = 0.00;
             $order->account_id = $event->account->id;
             $order->event_id = $ticket_order['event_id'];
+            $order->is_payment_received = isset($request_data['pay_offline']) ? 0 : 1;
             $order->save();
 
             /*
@@ -605,7 +650,7 @@ class EventCheckoutController extends Controller
             /*
              * Queue up some tasks - Emails to be sent, PDFs etc.
              */
-            Log::info('Firiing the event');
+            Log::info('Firing the event');
             event(new OrderCompletedEvent($order));
 
 

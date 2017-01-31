@@ -73,8 +73,7 @@ $(function () {
                 return;
             }
 
-            showMessage('Whoops!, it looks like something went wrong on our servers.\n\
-                   Please try again, or contact support if the problem persists.');
+            showMessage('Whoops!, it looks like the server returned an error.');
 
             var $submitButton = $form.find('input[type=submit]');
             toggleSubmitDisabled($submitButton);
@@ -391,6 +390,38 @@ $(function () {
             });
         }
     });
+
+    $(document.body).on('click', '.markPaymentReceived', function (e) {
+
+        var orderId = $(this).data('id'),
+            route = $(this).data('route');
+
+        $.post(route, 'order_id=' + orderId)
+            .done(function (data) {
+
+                if (typeof data.message !== 'undefined') {
+                    showMessage(data.message);
+                }
+
+                switch (data.status) {
+                    case 'success':
+                        setTimeout(function () {
+                            document.location.reload();
+                        }, 300);
+                        break;
+                    case 'error':
+                        /* Error */
+                        break;
+
+                    default:
+                        break;
+                }
+            }).fail(function (data) {
+            showMessage(Attendize.GenericErrorMessages);
+        });
+        e.preventDefault();
+    });
+
 
 });
 

@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http;
+
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
 class Kernel extends HttpKernel
 {
     /**
@@ -19,6 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\VerifyCsrfToken::class,
         \App\Http\Middleware\GeneralChecks::class,
     ];
+
     /**
      * The application's route middleware groups.
      *
@@ -35,6 +39,7 @@ class Kernel extends HttpKernel
             'throttle:60,1',
         ],
     ];
+
     /**
      * The application's route middleware.
      *
@@ -43,11 +48,11 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth'       => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'can' => \Illuminate\Foundation\Http\Middleware\Authorize::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'can'        => \Illuminate\Foundation\Http\Middleware\Authorize::class,
+        'guest'      => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'throttle'   => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'first.run'  => \App\Http\Middleware\FirstRunMiddleware::class,
         'installed'  => \App\Http\Middleware\CheckInstalled::class,
     ];

@@ -1,4 +1,3 @@
-
 <p align="center">
   <img src="https://www.attendize.com/img/logo-dark.png" alt="Attendize"/>
 </p>
@@ -9,14 +8,16 @@ https://www.attendize.com
 
 > PLEASE NOTE: Attendize is in the early stages of development and therefore is likely to contain bugs and unfinished features. Be wary about using Attendize in a production environment.
 
+> Please ask any questions/report bugs in our new support forum: https://attendize.com/forum/
 
 ######Demo Event Page: http://attendize.website/e/1/acmes-amazing-demo-event
 
 
 *Attendize* is an open-source event ticketing and event management application built using the Laravel PHP framework. Attendize was created to offer event organisers a simple solution to managing general admission events, without paying extortionate service fees.
 
+The current version (v1.X.X) will not receive any significant feature improvements, only security fixes. All effort will go into developing <a href="https://github.com/Attendize/Attendize/tree/develop">v2.0.0</a>.
 
-##Features
+##Current Features (v1.X.X)
  - Beautiful mobile friendly event pages
  - Easy attendee management - Refunds, Messaging etc.
  - Data export - attendees list to XLS, CSV etc.
@@ -34,20 +35,25 @@ https://www.attendize.com
  - Widget support - embed ticket selling widget into existing websites / WordPress blogs
  - Social sharing 
  - Support multiple payment gateways - Stripe, PayPal & Coinbase so far, with more being added
+ - Support for offline payments
  - Refund payments - partial refund & full refunds
  - Ability to add service charge to tickets
  - Messaging - eg. Email all attendees with X ticket
+ - Public event listings page for organisers
+ - Ability to ask custom questions during checkout
+ - Browser based QR code scanner for door management
     
-##Upcoming Features
+## Upcoming changes in v2.0.0
  - Theme support
  - Plugin Support
  - Localisation 
+ - Increased test coverage
+ - Laravel 5.4
  - IOS/Android check-in / door management apps
  - Coupon/discount code support
  - Support for more payment providers
  - WordPress Plug-in 
- - Public event listings page for organisers
- - Custom questions during checkout
+
 
 ## Official Documentation
 
@@ -78,7 +84,7 @@ Attendize will be available at `http://localhost:8080` and maildev at `http://lo
 
 ## License
 
-Attendize is open-sourced software licensed under the Attribution Assurance License. See [https://www.attendize.com/licence.php](https://www.attendize.com/licence.php) for further details.
+Attendize is open-sourced software licensed under the Attribution Assurance License. See [https://www.attendize.com/licence.php](https://www.attendize.com/licence.php) for further details. We also have white-label licence options available.
 
 ## Contributors 
 

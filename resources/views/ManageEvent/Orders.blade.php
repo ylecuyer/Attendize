@@ -114,15 +114,15 @@ Event Orders
                                 > {{$order->email}}</a>
                             </td>
                             <td>
-                                <a href="#" class="hint--top" data-hint="{{money($order->amount, $event->currency->code)}} + {{money($order->organiser_booking_fee, $event->currency->code)}} Organiser Booking Fee">
-                                    {{money($order->amount + $order->organiser_booking_fee, $event->currency->code)}}
+                                <a href="#" class="hint--top" data-hint="{{money($order->amount, $event->currency)}} + {{money($order->organiser_booking_fee, $event->currency)}} Organiser Booking Fee">
+                                    {{money($order->amount + $order->organiser_booking_fee, $event->currency)}}
                                     @if($order->is_refunded || $order->is_partially_refunded)
 
                                     @endif
                                 </a>
                             </td>
                             <td>
-                                <span class="label label-{{($order->is_refunded || $order->is_partially_refunded) ? 'warning' : 'success'}}">
+                                <span class="label label-{{(!$order->is_payment_received || $order->is_refunded || $order->is_partially_refunded) ? 'warning' : 'success'}}">
                                     {{$order->orderStatus->name}}
                                 </span>
                             </td>

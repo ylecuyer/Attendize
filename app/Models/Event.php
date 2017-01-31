@@ -10,7 +10,7 @@ use URL;
 class Event extends MyBaseModel
 {
     use SoftDeletes;
-    
+
     /**
      * The validation rules.
      *
@@ -48,7 +48,7 @@ class Event extends MyBaseModel
      */
     public function questions()
     {
-        return $this->belongsToMany('\App\Models\Question', 'event_question');
+        return $this->belongsToMany(\App\Models\Question::class, 'event_question');
     }
 
     /**
@@ -56,9 +56,9 @@ class Event extends MyBaseModel
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function questions_with_tashed()
+    public function questions_with_trashed()
     {
-        return $this->belongsToMany('\App\Models\Question', 'event_question')->withTrashed();
+        return $this->belongsToMany(\App\Models\Question::class, 'event_question')->withTrashed();
     }
 
     /**
@@ -68,7 +68,7 @@ class Event extends MyBaseModel
      */
     public function attendees()
     {
-        return $this->hasMany('\App\Models\Attendee');
+        return $this->hasMany(\App\Models\Attendee::class);
     }
 
     /**
@@ -78,7 +78,7 @@ class Event extends MyBaseModel
      */
     public function images()
     {
-        return $this->hasMany('\App\Models\EventImage');
+        return $this->hasMany(\App\Models\EventImage::class);
     }
 
     /**
@@ -88,7 +88,7 @@ class Event extends MyBaseModel
      */
     public function messages()
     {
-        return $this->hasMany('\App\Models\Message')->orderBy('created_at', 'DESC');
+        return $this->hasMany(\App\Models\Message::class)->orderBy('created_at', 'DESC');
     }
 
     /**
@@ -98,7 +98,7 @@ class Event extends MyBaseModel
      */
     public function tickets()
     {
-        return $this->hasMany('\App\Models\Ticket');
+        return $this->hasMany(\App\Models\Ticket::class);
     }
 
     /**
@@ -108,7 +108,7 @@ class Event extends MyBaseModel
      */
     public function stats()
     {
-        return $this->hasMany('\App\Models\EventStats');
+        return $this->hasMany(\App\Models\EventStats::class);
     }
 
     /**
@@ -118,7 +118,7 @@ class Event extends MyBaseModel
      */
     public function affiliates()
     {
-        return $this->hasMany('\App\Models\Affiliate');
+        return $this->hasMany(\App\Models\Affiliate::class);
     }
 
     /**
@@ -128,7 +128,7 @@ class Event extends MyBaseModel
      */
     public function orders()
     {
-        return $this->hasMany('\App\Models\Order');
+        return $this->hasMany(\App\Models\Order::class);
     }
 
     /**
@@ -138,7 +138,7 @@ class Event extends MyBaseModel
      */
     public function account()
     {
-        return $this->belongsTo('\App\Models\Account');
+        return $this->belongsTo(\App\Models\Account::class);
     }
 
     /**
@@ -148,7 +148,7 @@ class Event extends MyBaseModel
      */
     public function currency()
     {
-        return $this->belongsTo('\App\Models\Currency');
+        return $this->belongsTo(\App\Models\Currency::class);
     }
 
     /**
@@ -158,7 +158,7 @@ class Event extends MyBaseModel
      */
     public function organiser()
     {
-        return $this->belongsTo('\App\Models\Organiser');
+        return $this->belongsTo(\App\Models\Organiser::class);
     }
 
     /**
@@ -222,6 +222,48 @@ class Event extends MyBaseModel
     }
 
     /**
+     * Return an array of attendees and answers they gave to questions at checkout
+     *
+     * @return array
+     */
+    public function getSurveyAnswersAttribute()
+    {
+        $rows[] = array_merge([
+            'Order Ref',
+            'Attendee Name',
+            'Attendee Email',
+            'Attendee Ticket'
+        ], $this->questions->lists('title')->toArray());
+
+        $attendees = $this->attendees()->has('answers')->get();
+
+        foreach ($attendees as $attendee) {
+
+            $answers = [];
+
+            foreach ($this->questions as $question) {
+
+                if (in_array($question->id, $attendee->answers->lists('question_id')->toArray())) {
+                    $answers[] = $attendee->answers->where('question_id', $question->id)->first()->answer_text;
+                } else {
+                    $answers[] = null;
+                }
+
+            }
+
+            $rows[] = array_merge([
+                $attendee->order->order_reference,
+                $attendee->full_name,
+                $attendee->email,
+                $attendee->ticket->title
+            ], $answers);
+
+        }
+
+        return $rows;
+    }
+
+    /**
      * Get the embed html code.
      *
      * @return string
@@ -229,7 +271,7 @@ class Event extends MyBaseModel
     public function getEmbedHtmlCodeAttribute()
     {
         return "<!--Attendize.com Ticketing Embed Code-->
-                <iframe style='overflow:hidden; min-height: 350px;' frameBorder='0' seamless='seamless' width='100%' height='100%' src='".$this->embed_url."' vspace='0' hspace='0' scrolling='auto' allowtransparency='true'></iframe>
+                <iframe style='overflow:hidden; min-height: 350px;' frameBorder='0' seamless='seamless' width='100%' height='100%' src='" . $this->embed_url . "' vspace='0' hspace='0' scrolling='auto' allowtransparency='true'></iframe>
                 <!--/Attendize.com Ticketing Embed Code-->";
     }
 
@@ -239,13 +281,13 @@ class Event extends MyBaseModel
      */
     public function getMapAddressAttribute()
     {
-        $string = $this->venue.','
-                .$this->location_street_number.','
-                .$this->location_address_line_1.','
-                .$this->location_address_line_2.','
-                .$this->location_state.','
-                .$this->location_post_code.','
-                .$this->location_country;
+        $string = $this->venue . ','
+            . $this->location_street_number . ','
+            . $this->location_address_line_1 . ','
+            . $this->location_address_line_2 . ','
+            . $this->location_state . ','
+            . $this->location_post_code . ','
+            . $this->location_country;
 
         return urlencode($string);
     }
@@ -257,7 +299,7 @@ class Event extends MyBaseModel
      */
     public function getBgImageUrlAttribute()
     {
-        return URL::to('/').'/'.$this->bg_image_path;
+        return URL::to('/') . '/' . $this->bg_image_path;
     }
 
     /**
@@ -267,7 +309,7 @@ class Event extends MyBaseModel
      */
     public function getEventUrlAttribute()
     {
-        return URL::to('/').'/e/'.$this->id.'/'.Str::slug($this->title);
+        return URL::to('/') . '/e/' . $this->id . '/' . Str::slug($this->title);
     }
 
     /**
@@ -283,7 +325,7 @@ class Event extends MyBaseModel
     /**
      * The attributes that should be mutated to dates.
      *
-     * @var array $dates
+     * @return array $dates
      */
     public function getDates()
     {
@@ -298,5 +340,33 @@ class Event extends MyBaseModel
     public function models()
     {
       return $this->hasMany('App\Models\Model');
+    }
+
+    public function getIcsForEvent()
+    {
+        $siteUrl = URL::to('/');
+        $eventUrl = $this->getEventUrlAttribute();
+
+        $start_date = new Carbon($this->start_date);
+        $end_date = new Carbon($this->end_date);
+        $timestamp = new Carbon();
+
+        $icsTemplate = <<<ICSTemplate
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:{$siteUrl}
+BEGIN:VEVENT
+UID:{$eventUrl}
+DTSTAMP:{$timestamp->format('Ymd\THis\Z')}
+DTSTART:{$start_date->format('Ymd\THis\Z')}
+DTEND:{$end_date->format('Ymd\THis\Z')}
+SUMMARY:$this->title
+LOCATION:{$this->venue_name}
+DESCRIPTION:{$this->description}
+END:VEVENT
+END:VCALENDAR
+ICSTemplate;
+
+        return $icsTemplate;
     }
 }

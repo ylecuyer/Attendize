@@ -20,21 +20,28 @@ class AccountPaymentGateway extends MyBaseModel
         'config'
     ];
 
+    /**
+     * Account associated with gateway
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function account() {
-        return $this->belongsTo('\App\Models\Account');
+        return $this->belongsTo(\App\Models\Account::class);
     }
-
-    public function payment_gateway()
-    {
-        return $this->belongsTo('\App\Models\PaymentGateway', 'payment_gateway_id', 'id');
-    }
-
-
-
-
 
     /**
-     * @param $val
+     * Parent payment gateway
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function payment_gateway()
+    {
+        return $this->belongsTo(\App\Models\PaymentGateway::class, 'payment_gateway_id', 'id');
+    }
+
+    /**
+     * @param $value
+     *
      * @return mixed
      */
     public function getConfigAttribute($value) {
@@ -44,6 +51,4 @@ class AccountPaymentGateway extends MyBaseModel
     public function setConfigAttribute($value) {
         $this->attributes['config'] = json_encode($value);
     }
-
-
 }

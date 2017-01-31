@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Attendize\Utils;
 use App\Models\Affiliate;
 use App\Models\Event;
 use App\Models\EventStats;
@@ -26,13 +27,13 @@ class EventViewController extends Controller
     {
         $event = Event::findOrFail($event_id);
 
-        if (!Auth::check() && !$event->is_live) {
+        if (!Utils::userOwns($event) && !$event->is_live) {
             return view('Public.ViewEvent.EventNotLivePage');
         }
 
         $data = [
             'event'       => $event,
-            'tickets'     => $event->tickets()->orderBy('created_at', 'desc')->get(),
+            'tickets'     => $event->tickets()->where('is_hidden', 0)->orderBy('sort_order', 'asc')->get(),
             'is_embedded' => 0,
         ];
         /*
@@ -60,7 +61,7 @@ class EventViewController extends Controller
 
                 $affiliate->save();
 
-                Cookie::queue('affiliate_'.$event_id, $affiliate_ref, 60 * 24 * 60);
+                Cookie::queue('affiliate_' . $event_id, $affiliate_ref, 60 * 24 * 60);
             }
         }
 
@@ -111,16 +112,28 @@ class EventViewController extends Controller
             'event'           => $event,
         ];
 
-        Mail::send('Emails.messageOrganiser', $data, function ($message) use ($event, $data) {
+        Mail::send('Emails.messageReceived', $data, function ($message) use ($event, $data) {
             $message->to($event->organiser->email, $event->organiser->name)
                 ->from(config('attendize.outgoing_email_noreply'), $data['sender_name'])
                 ->replyTo($data['sender_email'], $data['sender_name'])
-                ->subject('Message Regarding: '.$event->title);
+                ->subject('Message Regarding: ' . $event->title);
         });
 
         return response()->json([
             'status'  => 'success',
             'message' => 'Message Successfully Sent',
+        ]);
+    }
+
+    public function showCalendarIcs(Request $request, $event_id)
+    {
+        $event = Event::findOrFail($event_id);
+
+        $icsContent = $event->getIcsForEvent();
+
+        return response()->make($icsContent, 200, [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="event.ics'
         ]);
     }
 }

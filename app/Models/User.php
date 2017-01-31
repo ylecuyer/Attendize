@@ -60,7 +60,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     public function account()
     {
-        return $this->belongsTo('\App\Models\Account');
+        return $this->belongsTo(\App\Models\Account::class);
     }
 
     /**
@@ -70,7 +70,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     public function activity()
     {
-        return $this->hasMany('\App\Models\Activity');
+        return $this->hasMany(\App\Models\Activity::class);
     }
 
     /**
@@ -140,7 +140,7 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      */
     public function getFullNameAttribute()
     {
-        return $this->first_name.' '.$this->last_name;
+        return $this->first_name . ' ' . $this->last_name;
     }
 
     /**

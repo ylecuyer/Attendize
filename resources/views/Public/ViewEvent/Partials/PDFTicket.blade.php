@@ -85,22 +85,24 @@
                             <h4>Attendee Ref.</h4>
                             {{$attendee->reference}}
                             <h4>Price</h4>
-                            {{money($attendee->ticket->total_price, $order->event->currency->code)}} (inc. {{money($attendee->ticket->total_booking_fee, $order->event->currency->code)}} Fees)
+                            {{money($attendee->ticket->total_price, $order->event->currency)}} (inc. {{money($attendee->ticket->total_booking_fee, $order->event->currency)}} Fees)
                         </div>
 
                         <div class="barcode">
                             {!! DNS2D::getBarcodeSVG($attendee->private_reference_number, "QRCODE", 6, 6) !!}
                         </div>
+                        @if($event->is_1d_barcode_enabled)
                         <div class="barcode_vertical">
-                  {{-- DNS1D::getBarcodeSVG($attendee->private_reference_number, "C39+", 1, 50) !!}<br>{{$attendee->private_reference_number --}}
+                            {!! DNS1D::getBarcodeSVG($attendee->private_reference_number, "C39+", 1, 50) !!}
                         </div>
+                        @endif
                     </div>
                 @endif
             @endforeach
 
             <div class="bottom_info">
                 {{--Attendize is provided free of charge on the condition the below hyperlink is left in place.--}}
-                {{--See https://github.com/Attendize/Attendize/blob/master/LICENSE for more information.--}}
+                {{--See https://www.attendize.com/licence.php for more information.--}}
                 @include('Shared.Partials.PoweredBy')
             </div>
         </div>

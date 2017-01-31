@@ -2,19 +2,36 @@
 
 namespace App\Attendize;
 
+use Auth;
+use PhpSpec\Exception\Exception;
+
 class Utils
 {
-    
+    /**
+     * Check if the current user is registered
+     *
+     * @return bool
+     */
     public static function isRegistered()
     {
         return Auth::check() && Auth::user()->is_registered;
     }
 
+    /**
+     * Check if the current user is confirmed
+     *
+     * @return bool
+     */
     public static function isConfirmed()
     {
         return Auth::check() && Auth::user()->is_confirmed;
     }
 
+    /**
+     * Check if the DB has been set up
+     *
+     * @return bool
+     */
     public static function isDatabaseSetup()
     {
         try {
@@ -58,9 +75,40 @@ class Utils
 
     public static function isDownForMaintenance()
     {
-        return file_exists(storage_path().'/framework/down');
+        return file_exists(storage_path() . '/framework/down');
     }
 
+    /**
+     * Check if a user has admin access to events etc.
+     *
+     * @todo - This is a temp fix until user roles etc. are implemented
+     * @param $object
+     * @return bool
+     */
+    public static function userOwns($object)
+    {
+        if (!Auth::check()) {
+            return false;
+        }
+
+        try {
+
+            if (Auth::user()->account_id === $object->account_id) {
+                return true;
+            }
+
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine max upload size
+     *
+     * @return float|int
+     */
     public static function file_upload_max_size()
     {
         static $max_size = -1;
@@ -80,6 +128,12 @@ class Utils
         return $max_size;
     }
 
+    /**
+     * Parses the given size
+     *
+     * @param $size
+     * @return float
+     */
     public static function parse_size($size)
     {
         $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
