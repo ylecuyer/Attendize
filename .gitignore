@@ -11,3 +11,7 @@ installed
 /composer.phar
 _ide_helper.php
 *.swp
+public/system
+
+privkey.pem
+fullchain.pem
