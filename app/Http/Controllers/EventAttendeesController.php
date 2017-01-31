@@ -292,9 +292,6 @@ class EventAttendeesController extends MyBaseController
                     $attendee_last_name = $rows['last_name'];
                     $attendee_email = $rows['email'];
 
-                    error_log($ticket_id . ' ' . $ticket_price . ' ' . $email_attendee);
-
-
                     /**
                      * Create the order
                      */
@@ -813,7 +810,7 @@ class EventAttendeesController extends MyBaseController
     {
         $attendee = Attendee::scope()->findOrFail($attendee_id);
 
-        $this->dispatch(new SendAttendeeTicket($attendee));
+        $this->dispatch(new SendAttendeeInvite($attendee));
 
         return response()->json([
             'status'  => 'success',

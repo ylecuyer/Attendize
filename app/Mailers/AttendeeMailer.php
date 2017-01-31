@@ -93,15 +93,16 @@ class AttendeeMailer extends Mailer
 
             $data = [
               'attendee' => $attendee,
+	      'message' => $message,
             ];
 
             $content = "";
             if ($attendee->event->invitation_model_id != null) {
               $path = $attendee->event->model->html->path();
-              $content = view()->file($path, $data);
+              $content = view()->file($path, $data)->render();
             }
             else {
-              $content = view('Mailers.TicketMailer.SendAttendeeInvite', $data);
+              $content = view('Mailers.TicketMailer.SendAttendeeInvite', $data)->render();
             }
             
 
