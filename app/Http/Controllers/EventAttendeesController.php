@@ -23,6 +23,8 @@ use Mail;
 use Omnipay\Omnipay;
 use PDF;
 use Validator;
+use Egulias\EmailValidator\EmailValidator;
+use Egulias\EmailValidator\Validation\RFCValidation;
 
 class EventAttendeesController extends MyBaseController
 {
@@ -281,16 +283,28 @@ class EventAttendeesController extends MyBaseController
         $num_added = 0;
         if ($request->file('attendees_list')) {
 
+		$validator = new EmailValidator();
+		$rfcValidation = new RFCValidation();
+
             $the_file = Excel::load($request->file('attendees_list')->getRealPath(), function ($reader) {
             })->get();
 
+	    $invalid_lines = array();
+	    $line = 0;
+	
             // Loop through
             foreach ($the_file as $rows) {
-                if (!empty($rows['first_name']) && !empty($rows['last_name']) && !empty($rows['email'])) {
-                    $num_added++;
+		    $line++;
+
                     $attendee_first_name = $rows['first_name'];
                     $attendee_last_name = $rows['last_name'];
                     $attendee_email = $rows['email'];
+
+		    $email_valid = $validator->isValid($attendee_email, $rfcValidation);
+
+                if (!empty($attendee_first_name) && !empty($attendee_last_name) && $email_valid) {
+
+                    $num_added++;
 
                     /**
                      * Create the order
@@ -348,10 +362,18 @@ class EventAttendeesController extends MyBaseController
                         $this->dispatch(new SendAttendeeInvite($attendee));
                     }
                 }
+		else {
+			$invalid_lines[] = $line;		
+		}
             };
         }
 
-        session()->flash('message', $num_added . ' Attendees Successfully Invited');
+	if (count($invalid_lines) > 0) {
+		session()->flash('message', 'Invalid lines: '. join(',', $invalid_lines) . ' . '. $num_added . ' Attendees Successfully Invited.');
+	}
+	else {
+		session()->flash('message', $num_added . ' Attendees Successfully Invited.');
+	}
 
         return response()->json([
             'status'      => 'success',
